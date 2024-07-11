@@ -1,15 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectModel(User.name) private readonly usersModule: Model<User>,
+  ) {}
+  async create(createUserDto: CreateUserDto) {
+    const user = await this.usersModule.create(createUserDto);
+    const savedUser = user.save();
+    if (!savedUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return savedUser;
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.usersModule.find();
   }
 
   findOne(id: number) {
