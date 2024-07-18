@@ -23,15 +23,25 @@ export class UsersService {
     return this.usersModule.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const user = await this.usersModule.findById(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const deleteOne = await this.usersModule
+      .findOneAndDelete({ id: id })
+      .exec();
+    if (!deleteOne) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return 'Successfully deleted user';
   }
 }
